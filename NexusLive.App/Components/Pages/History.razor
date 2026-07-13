@@ -1,0 +1,93 @@
+@page "/history"
+@inject MeetingHistoryService HistoryService
+
+<PageTitle>NexusLive - Historial de Reuniones</PageTitle>
+
+<div class="row g-4">
+    <!-- Meeting List Column -->
+    <div class="@(SelectedMeeting == null ? "col-12" : "col-lg-5") transition-all">
+        <div class="card dark-card p-4">
+            <h5 class="card-title text-info mb-3"><i class="bi bi-clock-history"></i> Historial de Reuniones</h5>
+            <p class="text-muted small">Haz clic en una reunión para abrir y revisar su transcripción y resumen.</p>
+
+            @if (Meetings.Count == 0)
+            {
+                <div class="text-center text-muted py-5 border border-secondary border-dashed rounded">
+                    <i class="bi bi-calendar-x fs-2 d-block mb-2"></i>
+                    <p class="m-0">No se han encontrado reuniones anteriores. Inicia una reunión en el Panel en Vivo para registrar el historial.</p>
+                </div>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var meeting in Meetings)
+                    {
+                        var isSelected = SelectedMeeting?.Id == meeting.Id;
+                        <button type="button" @onclick="() => SelectMeeting(meeting)" class="list-group-item list-group-item-action bg-dark text-white border-secondary mb-2 p-3 rounded @(isSelected ? "border-info" : "")" style="transition: all 0.2s; border-left: 4px solid @(isSelected ? "#38bdf8" : "transparent");">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span class="fw-bold text-primary font-monospace">@meeting.Id</span>
+                                <span class="badge bg-secondary font-monospace small">@meeting.Date.ToLocalTime().ToString("g")</span>
+                            </div>
+                            <p class="m-0 text-muted small text-truncate">
+                                @((meeting.Summary.Length > 85) ? meeting.Summary[..85] + "..." : meeting.Summary)
+                            </p>
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Meeting Details Column -->
+    @if (SelectedMeeting != null)
+    {
+        <div class="col-lg-7">
+            <div class="card dark-card p-4 position-relative">
+                <!-- Close Button -->
+                <button type="button" @onclick="CloseDetails" class="btn-close btn-close-white position-absolute top-0 end-0 m-3" aria-label="Cerrar"></button>
+
+                <h4 class="gradient-text mb-3">Detalle de la Reunión</h4>
+                <div class="mb-4">
+                    <span class="badge bg-secondary py-2 px-3 fs-6 font-monospace">ID: @SelectedMeeting.Id</span>
+                    <span class="badge bg-dark border border-secondary text-muted py-2 px-3 fs-6 ms-2">Fecha: @SelectedMeeting.Date.ToLocalTime().ToString("F")</span>
+                </div>
+
+                <!-- Post Session Summary Box -->
+                <div class="mb-4">
+                    <h5 class="text-info border-bottom border-secondary pb-2"><i class="bi bi-file-earmark-text"></i> Resumen Analítico</h5>
+                    <div class="p-3 bg-dark border border-secondary rounded text-white font-monospace" style="white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; background-color: #030712 !important;">
+                        @SelectedMeeting.Summary
+                    </div>
+                </div>
+
+                <!-- Full Transcript Box -->
+                <div>
+                    <h5 class="text-success border-bottom border-secondary pb-2"><i class="bi bi-chat-left-text"></i> Transcripción Completa</h5>
+                    <div class="lyrics-container border border-secondary rounded p-3 bg-dark font-monospace text-white" style="height: 350px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6; font-size: 0.95rem; background-color: #030712 !important;">
+                        @SelectedMeeting.Transcript
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<MeetingHistoryItem> Meetings = new();
+    private MeetingHistoryItem? SelectedMeeting = null;
+
+    protected override void OnInitialized()
+    {
+        Meetings = HistoryService.GetAllMeetings();
+    }
+
+    private void SelectMeeting(MeetingHistoryItem meeting)
+    {
+        SelectedMeeting = meeting;
+    }
+
+    private void CloseDetails()
+    {
+        SelectedMeeting = null;
+    }
+}

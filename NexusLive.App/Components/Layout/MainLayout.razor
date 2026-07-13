@@ -1,0 +1,59 @@
+@inherits LayoutComponentBase
+@inject MeetingSessionCoordinator Coordinator
+@implements IDisposable
+
+<div class="container py-4">
+    <!-- Premium Global Header with Navigation and Live Status -->
+    <header class="d-flex flex-wrap justify-content-between align-items-center border-bottom border-secondary pb-3 mb-4 gap-3">
+        <div class="d-flex align-items-center gap-4">
+            <div>
+                <h1 class="gradient-text m-0 fs-2"><i class="bi bi-cpu-fill"></i> NexusLive</h1>
+                <p class="text-muted m-0 small">Asistencia inteligente local de ultra baja latencia</p>
+            </div>
+            <nav class="d-flex gap-2">
+                <a href="" class="btn btn-outline-primary btn-sm px-3 fw-semibold"><i class="bi bi-speedometer2"></i> Panel en Vivo</a>
+                <a href="history" class="btn btn-outline-info btn-sm px-3 fw-semibold"><i class="bi bi-clock-history"></i> Historial de Reuniones</a>
+            </nav>
+        </div>
+        
+        <div class="d-flex align-items-center gap-3">
+            <div>
+                <span class="badge @(Coordinator.IsSessionActive ? "bg-success" : "bg-secondary") py-2 px-3">
+                    @if (Coordinator.IsSessionActive)
+                    {
+                        <span class="live-pulse me-1"></span> @("SESIÓN ACTIVA")
+                    }
+                    else
+                    {
+                        @("SESIÓN INACTIVA")
+                    }
+                </span>
+            </div>
+            <div class="text-end small">
+                <span class="text-muted d-block" style="font-size: 0.8rem;">Estado del Servidor LLM:</span>
+                <span class="fw-semibold text-info" style="font-size: 0.9rem;"><i class="bi bi-activity"></i> @Coordinator.ModelStatusMessage</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        @Body
+    </main>
+</div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Coordinator.OnStateChanged += HandleStateChanged;
+    }
+
+    private void HandleStateChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Coordinator.OnStateChanged -= HandleStateChanged;
+    }
+}

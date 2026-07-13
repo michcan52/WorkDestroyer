@@ -1,0 +1,333 @@
+@page "/"
+@inject MeetingSessionCoordinator Coordinator
+@inject IssueStateManager StateManager
+@inject LlmOptions Options
+@inject SlidingWindowMemory WorkingMemory
+@inject IJSRuntime JS
+@implements IDisposable
+
+<PageTitle>NexusLive - Intelligent Meeting Assistant</PageTitle>
+
+<div class="row g-4">
+    <!-- Left Column: Transcription and Simulation Controls -->
+    <div class="col-lg-8">
+        @if (Coordinator.IsSessionActive)
+        {
+            <div class="alert alert-success d-flex align-items-center gap-2 mb-3" style="background-color: #064e3b !important; border-color: #059669 !important; color: #34d399 !important;">
+                <span class="live-pulse me-1"></span>
+                <span><strong>Grabando y escuchando activamente:</strong> Transcribiendo micrófono en vivo en <strong>@(TranscriptionLanguage == "es-ES" ? "Español (es-ES)" : "Inglés (en-US)")</strong>.</span>
+            </div>
+        }
+
+        <!-- Live Transcription Card -->
+        <div class="card dark-card p-4 mb-4">
+            <h5 class="card-title text-primary mb-3"><i class="bi bi-chat-left-dots"></i> Transcripción en Vivo <span class="text-muted fs-6 font-monospace">(Lyrics Style)</span></h5>
+            
+            <div class="lyrics-container border border-secondary rounded p-3 bg-dark" style="height: 350px;">
+                @if (ActiveSegments.Count == 0)
+                {
+                    <div class="text-center text-muted py-5">
+                        <i class="bi bi-mic fs-2 d-block mb-2"></i>
+                        <p class="m-0">Esperando transmisiones de audio para transcribir...</p>
+                    </div>
+                }
+                else
+                {
+                    @for (int i = 0; i < ActiveSegments.Count; i++)
+                    {
+                        var segment = ActiveSegments[i];
+                        bool isNewest = (i == ActiveSegments.Count - 1);
+                        <div class="lyrics-line @(isNewest ? "newest" : "")">
+                            <span class="text-info small fw-bold font-monospace">[@segment.Timestamp.ToLocalTime().ToString("HH:mm:ss")]</span>
+                            <span class="ms-2">@segment.Text</span>
+                        </div>
+                    }
+                }
+            </div>
+
+            <!-- Simulator Input (To mock real-time audio transcriptions) -->
+            <div class="mt-3">
+                <label class="form-label text-muted small">Simular Entrada de Audio (Escribe una frase y envíala):</label>
+                <div class="input-group">
+                    <input @bind="SimulatedInput" @onkeyup="HandleKeyUp" type="text" class="form-control bg-dark border-secondary text-white" placeholder="Ej: Hola equipo, ya solucionamos el problema del buffer del audio..." disabled="@(!Coordinator.IsSessionActive || IsProcessing)" />
+                    <button @onclick="SendSimulatedTranscription" class="btn btn-primary" type="button" disabled="@(!Coordinator.IsSessionActive || IsProcessing || string.IsNullOrWhiteSpace(SimulatedInput))">
+                        <i class="bi bi-send"></i> Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytical Summary Box (Visible after session ends) -->
+        @if (!Coordinator.IsSessionActive && !string.IsNullOrEmpty(Coordinator.MeetingSummary))
+        {
+            <div class="card dark-card p-4 border border-info suggestion-box">
+                <h5 class="card-title text-info mb-3"><i class="bi bi-file-earmark-text"></i> Resumen Analítico de la Sesión</h5>
+                <p style="white-space: pre-wrap;" class="lh-base">@Coordinator.MeetingSummary</p>
+            </div>
+        }
+    </div>
+
+    <!-- Right Column: Live Suggestions & Issue Tracker -->
+    <div class="col-lg-4">
+        <!-- Action Buttons -->
+        <div class="card dark-card p-4 mb-4 text-center">
+            <h5 class="card-title text-muted mb-3"><i class="bi bi-sliders"></i> Controles de Sesión</h5>
+            <div class="mb-3 text-start">
+                <label class="form-label text-muted small"><i class="bi bi-translate text-info"></i> Idioma de Transcripción:</label>
+                <select @bind="TranscriptionLanguage" class="form-select bg-dark text-white border-secondary" disabled="@(Coordinator.IsSessionActive || IsProcessing)">
+                    <option value="es-ES">Español (es-ES)</option>
+                    <option value="en-US">English (en-US)</option>
+                </select>
+            </div>
+            <div class="d-grid gap-2">
+                @if (!Coordinator.IsSessionActive)
+                {
+                    <button @onclick="StartMeetingSession" class="btn btn-success py-2 fw-semibold" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> @("Cargando...")
+                        }
+                        else
+                        {
+                            <i class="bi bi-play-fill"></i> @("Iniciar Reunión")
+                        }
+                    </button>
+                }
+                else
+                {
+                    <button @onclick="EndMeetingSession" class="btn btn-danger py-2 fw-semibold" disabled="@IsProcessing">
+                        @if (IsProcessing)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1" role="status"></span> @("Procesando...")
+                        }
+                        else
+                        {
+                            <i class="bi bi-stop-fill"></i> @("Terminar Reunión")
+                        }
+                    </button>
+                }
+            </div>
+        </div>
+
+        <!-- Live Suggestion Box (Phi-4-mini) -->
+        <div class="card dark-card p-4 mb-4">
+            <h5 class="card-title text-warning mb-3"><i class="bi bi-lightning-charge"></i> Sugerencia en Tiempo Real</h5>
+            @if (Coordinator.IsSessionActive)
+            {
+                if (string.IsNullOrEmpty(Coordinator.LiveSuggestion))
+                {
+                    <div class="text-center text-muted py-4">
+                        <div class="spinner-border spinner-border-sm text-warning mb-2" role="status"></div>
+                        <p class="m-0 small">Escuchando el contexto para generar sugerencias...</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="suggestion-box p-3 rounded">
+                        <p class="m-0 fw-semibold text-success font-monospace" style="font-size: 0.95rem;">
+                            <i class="bi bi-lightbulb-fill"></i> @Coordinator.LiveSuggestion
+                        </p>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center text-muted py-4">
+                    <p class="m-0 small">Inicia la sesión para comenzar a recibir sugerencias.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Active Issues Tracker -->
+        <div class="card dark-card p-4">
+            <h5 class="card-title text-success mb-3"><i class="bi bi-check2-square"></i> Gestión de Estado de Problemas</h5>
+            <p class="text-muted small">Haz clic en la casilla para cambiar el estado (se guarda automáticamente en JSON):</p>
+            
+            <div class="list-group list-group-flush bg-transparent">
+                @if (IssuesList.Count == 0)
+                {
+                    <div class="text-center text-muted py-3">
+                        <p class="m-0 small">No hay problemas cargados en el sistema.</p>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var issue in IssuesList)
+                    {
+                        <div class="list-group-item bg-transparent text-white border-secondary px-0 py-2 d-flex align-items-start gap-2">
+                            <input class="form-check-input mt-1 border-secondary" type="checkbox" checked="@(issue.Status == IssueStatus.Resolved)" @onchange="@(async (e) => await ToggleIssueStatusAsync(issue, e))" id="@issue.Id" />
+                            <div class="lh-sm">
+                                <label class="form-check-label fw-semibold @(issue.Status == IssueStatus.Resolved ? "text-decoration-line-through text-muted" : "")" for="@issue.Id">
+                                    @issue.Id: @issue.Description
+                                </label>
+                                <div class="d-flex align-items-center gap-2 mt-1">
+                                    <span class="badge bg-secondary font-monospace" style="font-size: 0.75rem;">@issue.Category</span>
+                                    @if (issue.Status == IssueStatus.Resolved && !string.IsNullOrEmpty(issue.ResolutionSummary))
+                                    {
+                                        <span class="text-muted" style="font-size: 0.75rem;" title="@issue.ResolutionSummary">
+                                            <i class="bi bi-info-circle"></i> Resuelto
+                                        </span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<TranscriptionSegment> ActiveSegments = new();
+    private List<IssueInfo> IssuesList = new();
+    private string SimulatedInput = string.Empty;
+    private string StateFilePath = string.Empty;
+    private bool IsProcessing = false;
+    private string TranscriptionLanguage = "es-ES";
+
+    protected override async Task OnInitializedAsync()
+    {
+        StateFilePath = Path.Combine(Directory.GetCurrentDirectory(), "meeting_issues_state.json");
+        
+        // Register event listener callbacks
+        Coordinator.OnStateChanged += HandleSessionStateChanged;
+        Coordinator.OnNewLiveSuggestion += HandleNewLiveSuggestion;
+
+        // Fetch initial list of issues from StateManager
+        await LoadIssuesListAsync();
+    }
+
+    private void HandleNewLiveSuggestion(string suggestion)
+    {
+        InvokeAsync(() =>
+        {
+            StateHasChanged();
+        });
+    }
+
+    private async Task LoadIssuesListAsync()
+    {
+        await StateManager.LoadFromFileAsync(StateFilePath);
+        IssuesList = StateManager.GetAllIssues();
+    }
+
+    private void HandleSessionStateChanged()
+    {
+        // Thread-safe UI update
+        InvokeAsync(async () =>
+        {
+            ActiveSegments = WorkingMemory.GetActiveSegments();
+            await LoadIssuesListAsync();
+            StateHasChanged();
+        });
+    }
+
+    private DotNetObjectReference<Index>? _selfReference;
+
+    private async Task StartMeetingSession()
+    {
+        if (IsProcessing) return;
+        IsProcessing = true;
+        StateHasChanged();
+        
+        try
+        {
+            ActiveSegments.Clear();
+            await Coordinator.StartSessionAsync();
+            
+            // Start browser microphone capture using JS SpeechRecognition API with the selected language
+            _selfReference = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("speechBridge.start", _selfReference, TranscriptionLanguage);
+        }
+        finally
+        {
+            IsProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task EndMeetingSession()
+    {
+        if (IsProcessing) return;
+        IsProcessing = true;
+        StateHasChanged();
+
+        try
+        {
+            // Stop browser microphone capture
+            await JS.InvokeVoidAsync("speechBridge.stop");
+            _selfReference?.Dispose();
+            _selfReference = null;
+
+            await Coordinator.EndSessionAsync(StateFilePath);
+        }
+        finally
+        {
+            IsProcessing = false;
+            StateHasChanged();
+        }
+    }
+
+    [JSInvokable]
+    public async Task ReceiveSpeechSegment(string text)
+    {
+        if (string.IsNullOrWhiteSpace(text)) return;
+        await Coordinator.AddTranscriptSegmentAsync(text);
+    }
+
+    private async Task SendSimulatedTranscription()
+    {
+        if (string.IsNullOrWhiteSpace(SimulatedInput)) return;
+
+        string currentText = SimulatedInput;
+        SimulatedInput = string.Empty;
+
+        // Add transcript segment into the pipeline
+        await Coordinator.AddTranscriptSegmentAsync(currentText);
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendSimulatedTranscription();
+        }
+    }
+
+    private async Task ToggleIssueStatusAsync(IssueInfo issue, ChangeEventArgs e)
+    {
+        bool isChecked = (bool)(e.Value ?? false);
+        issue.Status = isChecked ? IssueStatus.Resolved : IssueStatus.Pending;
+        
+        if (issue.Status == IssueStatus.Resolved)
+        {
+            issue.ResolutionSummary = "Marcado resuelto manualmente desde la interfaz web.";
+        }
+        else
+        {
+            issue.ResolutionSummary = null;
+        }
+
+        // Save immediately
+        StateManager.AddOrUpdateIssue(issue);
+        await StateManager.SaveToFileAsync(StateFilePath);
+        await LoadIssuesListAsync();
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        // Unregister event listener callbacks
+        Coordinator.OnStateChanged -= HandleSessionStateChanged;
+        Coordinator.OnNewLiveSuggestion -= HandleNewLiveSuggestion;
+        
+        // Stop capture & dispose reference
+        try
+        {
+            _ = JS.InvokeVoidAsync("speechBridge.stop");
+        }
+        catch {}
+        _selfReference?.Dispose();
+    }
+}

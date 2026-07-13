@@ -1,0 +1,249 @@
+/* Custom high-contrast Dark Mode theme for NexusLive */
+body {
+    background-color: #0b0f19 !important;
+    color: #f1f5f9 !important; /* Soft white/gray for excellent base text readability */
+    font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* High Contrast Override for Bootstrap Text Utilities on Dark Background */
+.text-muted {
+    color: #94a3b8 !important; /* Lighter slate-gray for text description readability */
+}
+
+.text-primary {
+    color: #60a5fa !important; /* Bright pastel blue (highly legible) */
+}
+
+.text-success {
+    color: #34d399 !important; /* Bright pastel emerald green */
+}
+
+.text-warning {
+    color: #fbbf24 !important; /* Bright warm amber yellow */
+}
+
+.text-info {
+    color: #38bdf8 !important; /* Bright sky blue */
+}
+
+.text-danger {
+    color: #f87171 !important; /* Bright pastel red */
+}
+
+/* Base Card Styling */
+.card.dark-card {
+    background-color: #111827 !important; /* Dark Gray 900 */
+    border: 1px solid #1f2937 !important; /* Dark border */
+    color: #f3f4f6 !important;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+/* Titles readability */
+.card-title {
+    font-weight: 700 !important;
+    letter-spacing: 0.025em;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 700;
+}
+
+/* Pulse indicator */
+.live-pulse {
+    width: 10px;
+    height: 10px;
+    background-color: #ef4444;
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    animation: pulse-animation 1.5s infinite;
+}
+
+@keyframes pulse-animation {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+/* Transcription panel (Lyrics Style) text and readability */
+.lyrics-container {
+    max-height: 400px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
+    background-color: #030712 !important; /* Deeper black for container */
+    border: 1.5px solid #374151 !important;
+}
+
+.lyrics-line {
+    background-color: #1f2937 !important;
+    color: #ffffff !important; /* Pure white text for readability */
+    font-size: 1.15rem !important; /* Readable large size */
+    padding: 14px 16px !important;
+    border-radius: 8px !important;
+    border-left: 4px solid transparent !important;
+    transition: all 0.3s ease;
+    margin-bottom: 8px;
+}
+
+.lyrics-line:hover {
+    background-color: #374151 !important;
+    border-left-color: #3b82f6 !important;
+}
+
+.lyrics-line.newest {
+    animation: highlight-fade 2.5s ease-in-out;
+    border-left-color: #10b981 !important;
+}
+
+@keyframes highlight-fade {
+    0% {
+        background-color: #065f46 !important;
+    }
+    100% {
+        background-color: #1f2937 !important;
+    }
+}
+
+/* Controls input text box */
+.form-control {
+    background-color: #1f2937 !important;
+    color: #ffffff !important;
+    border: 1.5px solid #4b5563 !important;
+    font-size: 1rem !important;
+}
+
+.form-control:focus {
+    background-color: #111827 !important;
+    color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25) !important;
+}
+
+.form-control::placeholder {
+    color: #9ca3af !important;
+}
+
+/* High contrast buttons */
+.btn-primary {
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+}
+
+.btn-primary:disabled {
+    background-color: #374151 !important;
+    border-color: #4b5563 !important;
+    color: #9ca3af !important;
+}
+
+.btn-success {
+    background-color: #059669 !important;
+    border-color: #059669 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-success:hover {
+    background-color: #047857 !important;
+}
+
+.btn-danger {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+    color: #ffffff !important;
+    font-weight: 600;
+}
+
+.btn-danger:hover {
+    background-color: #b91c1c !important;
+}
+
+/* Suggestion Panel highlights */
+.suggestion-box {
+    border-left: 5px solid #10b981 !important;
+    background: linear-gradient(90deg, rgba(16, 185, 129, 0.05) 0%, rgba(16, 185, 129, 0) 100%) !important;
+    background-color: #022c22 !important; /* Deep emerald-tinted background */
+    color: #a7f3d0 !important;
+    animation: slide-in 0.4s ease-out;
+}
+
+.suggestion-box p {
+    color: #34d399 !important; /* Soft green */
+}
+
+@keyframes slide-in {
+    0% {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Badges styling */
+.badge.bg-secondary {
+    background-color: #374151 !important;
+    color: #f1f5f9 !important;
+}
+
+.badge.bg-success {
+    background-color: #065f46 !important;
+    color: #34d399 !important;
+}
+
+/* Checkbox styling */
+.form-check-input {
+    background-color: #1f2937 !important;
+    border-color: #4b5563 !important;
+    width: 1.25em;
+    height: 1.25em;
+}
+
+.form-check-input:checked {
+    background-color: #10b981 !important;
+    border-color: #10b981 !important;
+}
+
+.form-check-label {
+    cursor: pointer;
+    font-size: 1rem;
+    color: #f1f5f9 !important; /* Clear white text instead of low contrast gray */
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #111827;
+}
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}

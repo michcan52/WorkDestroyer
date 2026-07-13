@@ -1,0 +1,11 @@
+T:\WorkDestroyer\NexusLive.Core\bin\Release\net9.0\win-x64\NexusLive.Core.deps.json
+T:\WorkDestroyer\NexusLive.Core\bin\Release\net9.0\win-x64\NexusLive.Core.dll
+T:\WorkDestroyer\NexusLive.Core\bin\Release\net9.0\win-x64\NexusLive.Core.pdb
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\NexusLive.Core.GeneratedMSBuildEditorConfig.editorconfig
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\NexusLive.Core.AssemblyInfoInputs.cache
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\NexusLive.Core.AssemblyInfo.cs
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\NexusLive.Core.csproj.CoreCompileInputs.cache
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\NexusLive.Core.dll
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\refint\NexusLive.Core.dll
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\NexusLive.Core.pdb
+T:\WorkDestroyer\NexusLive.Core\obj\Release\net9.0\win-x64\ref\NexusLive.Core.dll

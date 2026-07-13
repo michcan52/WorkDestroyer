@@ -1,0 +1,62 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "T:\\WorkDestroyer\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1DACDB22-4C7D-4BFB-B277-A6780B0D741A}|NexusLive.Core\\NexusLive.Core.csproj|t:\\workdestroyer\\nexuslive.core\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{1DACDB22-4C7D-4BFB-B277-A6780B0D741A}|NexusLive.Core\\NexusLive.Core.csproj|solutionrelative:nexuslive.core\\class1.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{63428126-E9AB-4D1B-887A-F2DF82199C05}|NexusLive.Tests\\NexusLive.Tests.csproj|t:\\workdestroyer\\nexuslive.tests\\nexuslive.tests.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{63428126-E9AB-4D1B-887A-F2DF82199C05}|NexusLive.Tests\\NexusLive.Tests.csproj|solutionrelative:nexuslive.tests\\nexuslive.tests.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Class1.cs",
+              "DocumentMoniker": "T:\\WorkDestroyer\\NexusLive.Core\\Class1.cs",
+              "RelativeDocumentMoniker": "NexusLive.Core\\Class1.cs",
+              "ToolTip": "T:\\WorkDestroyer\\NexusLive.Core\\Class1.cs",
+              "RelativeToolTip": "NexusLive.Core\\Class1.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-07-13T00:18:17.264Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "NexusLive.Tests",
+              "DocumentMoniker": "T:\\WorkDestroyer\\NexusLive.Tests\\NexusLive.Tests.csproj",
+              "RelativeDocumentMoniker": "NexusLive.Tests\\NexusLive.Tests.csproj",
+              "ToolTip": "T:\\WorkDestroyer\\NexusLive.Tests\\NexusLive.Tests.csproj",
+              "RelativeToolTip": "NexusLive.Tests\\NexusLive.Tests.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-07-13T00:18:04.151Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
