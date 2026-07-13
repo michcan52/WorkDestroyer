@@ -1,6 +1,0 @@
-{
-  "Id": "MTG-20260713-012356",
-  "Date": "2026-07-13T01:23:56.4493705Z",
-  "Summary": "Session processed. Failed to update issue status due to JSON parse errors, but the meeting transcript has finished processing.",
-  "Transcript": "[01:23:08] Este es un test a ver si est\u00E1 funcionando la aplicaci\u00F3n por lo que veo la transcripci\u00F3n en vivo est\u00E1 lenta se est\u00E1 tardando en dar la sugerencia y la transcripci\u00F3n en vivo no se ve por lo tanto creo que no est\u00E1 funcionando correctamente de todas maneras le voy a dar unos segundos a ver si detecta algo pero al parecer no no creo\r\n[01:23:14]  Ah bueno S\u00ED ya lo hizo aunque se tard\u00F3 demasiado\r\n[01:23:21]  ya est\u00E1 intentando revisar esta cosa bueno\r\n[01:23:24]  okay"
-}
