@@ -30,9 +30,13 @@
             recognition: null,
             dotNetRef: null,
             active: false,
-            start: function (dotNetRef) {
+            lastResultTime: 0,
+            watchdogInterval: null,
+            start: function (dotNetRef, lang) {
                 this.dotNetRef = dotNetRef;
                 this.active = true;
+                this.lastResultTime = Date.now();
+                
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 if (!SpeechRecognition) {
                     console.error("Speech recognition is not supported in this browser.");
@@ -41,44 +45,94 @@
                 
                 this.recognition = new SpeechRecognition();
                 this.recognition.continuous = true;
-                this.recognition.interimResults = false;
-                this.recognition.lang = 'es-ES'; // Default language Spanish for meeting transcription
+                this.recognition.interimResults = true; // Use interim results to keep connection active and responsive
+                this.recognition.lang = lang || 'es-ES';
+                
+                // Track sent final indices to prevent duplication in continuous mode
+                const sentIndices = new Set();
                 
                 this.recognition.onresult = (event) => {
-                    const resultIndex = event.resultIndex;
-                    const transcript = event.results[resultIndex][0].transcript;
-                    console.log("[SPEECH RECOGNITION] Transcript segment: " + transcript);
-                    if (this.dotNetRef) {
-                        this.dotNetRef.invokeMethodAsync('ReceiveSpeechSegment', transcript);
+                    this.lastResultTime = Date.now(); // Feed watchdog on any speech activity
+                    
+                    for (let i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            if (!sentIndices.has(i)) {
+                                sentIndices.add(i);
+                                const transcript = event.results[i][0].transcript.trim();
+                                if (transcript.length > 0) {
+                                    console.log("[SPEECH RECOGNITION] Final segment: " + transcript);
+                                    if (this.dotNetRef) {
+                                        this.dotNetRef.invokeMethodAsync('ReceiveSpeechSegment', transcript);
+                                    }
+                                }
+                            }
+                        }
                     }
                 };
                 
                 this.recognition.onerror = (event) => {
                     console.error("[SPEECH RECOGNITION] Error: ", event.error);
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        this.active = false;
+                        this.stopWatchdog();
+                    }
                 };
                 
                 this.recognition.onend = () => {
                     console.log("[SPEECH RECOGNITION] Session ended.");
-                    // Keep continuous recording active while the session is running
                     if (this.active && this.dotNetRef) {
-                        try {
-                            this.recognition.start();
-                            console.log("[SPEECH RECOGNITION] Restarted session successfully.");
-                        } catch(e) {
-                            console.error("[SPEECH RECOGNITION] Restart error: ", e);
-                        }
+                        setTimeout(() => {
+                            try {
+                                if (this.active && this.recognition) {
+                                    sentIndices.clear();
+                                    this.recognition.start();
+                                    this.lastResultTime = Date.now();
+                                    console.log("[SPEECH RECOGNITION] Restarted session successfully.");
+                                }
+                            } catch(e) {
+                                console.error("[SPEECH RECOGNITION] Restart error: ", e);
+                            }
+                        }, 250);
                     }
                 };
                 
+                this.startWatchdog();
+                
                 try {
                     this.recognition.start();
-                    console.log("[SPEECH RECOGNITION] Started successfully.");
+                    console.log("[SPEECH RECOGNITION] Started successfully. Language: " + this.recognition.lang);
                 } catch(e) {
                     console.error("[SPEECH RECOGNITION] Start failed: ", e);
                 }
             },
+            
+            startWatchdog: function () {
+                this.stopWatchdog();
+                this.watchdogInterval = setInterval(() => {
+                    if (this.active && this.recognition) {
+                        const inactiveTime = Date.now() - this.lastResultTime;
+                        if (inactiveTime > 12000) { // 12 seconds of silence or hung state
+                            console.log("[SPEECH RECOGNITION WATCHDOG] Refreshing speech connection...");
+                            try {
+                                this.recognition.stop(); // Triggers onend and auto-restarts safely
+                            } catch (e) {
+                                console.error("[SPEECH RECOGNITION WATCHDOG] Error: ", e);
+                            }
+                        }
+                    }
+                }, 4000);
+            },
+            
+            stopWatchdog: function () {
+                if (this.watchdogInterval) {
+                    clearInterval(this.watchdogInterval);
+                    this.watchdogInterval = null;
+                }
+            },
+            
             stop: function () {
                 this.active = false;
+                this.stopWatchdog();
                 this.dotNetRef = null;
                 if (this.recognition) {
                     try {

@@ -1,5 +1,24 @@
 {
   "meetingId": "ede9b838-782e-4832-907a-31b7b775c85b",
-  "lastUpdated": "2026-07-13T01:45:05.2305151Z",
-  "issues": []
+  "lastUpdated": "2026-07-13T18:34:37.2758004Z",
+  "issues": [
+    {
+      "id": "ISS-001",
+      "description": "Crear script para reiniciar el commanager cuando las impresoras dejan de estar conectadas debido a cambios del ID del servidor.",
+      "status": "resolved",
+      "category": "Soporte",
+      "createdTimestamp": "2026-07-13T02:10:02.4807399Z",
+      "lastUpdatedTimestamp": "2026-07-13T18:34:37.2757145Z",
+      "resolutionSummary": "Se resolvi\u00F3 creando un script para reiniciar el commanager cuando las impresoras dejan de estar conectadas debido a cambios del ID del servidor."
+    },
+    {
+      "id": "ISS-002",
+      "description": "Resolver problemas con la interfaz entre IPEX y SAT SP, verificando si un c\u00F3digo espec\u00EDfico funciona correctamente.",
+      "status": "resolved",
+      "category": "General",
+      "createdTimestamp": "2026-07-13T02:10:02.4808709Z",
+      "lastUpdatedTimestamp": "2026-07-13T18:34:37.2757248Z",
+      "resolutionSummary": "Se resolvieron problemas entre IPEX e SAT SP verificando si un c\u00F3digo espec\u00EDfico funciona correctamente."
+    }
+  ]
 }
