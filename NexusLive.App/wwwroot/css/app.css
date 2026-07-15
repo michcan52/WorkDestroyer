@@ -1,7 +1,7 @@
 /* Custom high-contrast Dark Mode theme for NexusLive */
 body {
-    background-color: #0b0f19 !important;
-    color: #f1f5f9 !important; /* Soft white/gray for excellent base text readability */
+    background-color: #121212 !important;
+    color: #e0e0e0 !important; /* Soft white/gray for excellent base text readability */
     font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif;
     margin: 0;
     padding: 0;
@@ -34,11 +34,11 @@ body {
 
 /* Base Card Styling */
 .card.dark-card {
-    background-color: #111827 !important; /* Dark Gray 900 */
-    border: 1px solid #1f2937 !important; /* Dark border */
-    color: #f3f4f6 !important;
+    background-color: #1a1a1a !important; /* Lighter than #121212 */
+    border: 1.5px solid #2d2d2d !important; /* High contrast border */
+    color: #e0e0e0 !important;
     border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
 }
 
 /* Titles readability */
@@ -85,14 +85,16 @@ body {
     max-height: 400px;
     overflow-y: auto;
     scroll-behavior: smooth;
-    background-color: #030712 !important; /* Deeper black for container */
-    border: 1.5px solid #374151 !important;
+    background-color: #0a0a0a !important; /* Deeper black for container */
+    border: 2px solid #333333 !important;
 }
 
 .lyrics-line {
-    background-color: #1f2937 !important;
+    background-color: #222222 !important;
     color: #ffffff !important; /* Pure white text for readability */
-    font-size: 1.15rem !important; /* Readable large size */
+    font-size: 1.25rem !important; /* Readable large size */
+    font-weight: 500;
+    line-height: 1.5;
     padding: 14px 16px !important;
     border-radius: 8px !important;
     border-left: 4px solid transparent !important;
@@ -101,7 +103,7 @@ body {
 }
 
 .lyrics-line:hover {
-    background-color: #374151 !important;
+    background-color: #2e2e2e !important;
     border-left-color: #3b82f6 !important;
 }
 

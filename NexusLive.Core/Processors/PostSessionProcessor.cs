@@ -169,7 +169,8 @@ namespace NexusLive.Core.Processors
 
         private string GetAnalyticalSystemPrompt()
         {
-            return @"Eres el analizador de reuniones de NexusLive.
+            return @"Eres un Team Leader de NSAP para AMS. Tu prioridad es rastrear la evolución de problemas en aplicaciones, distinguir entre problemas nuevos y actualizaciones de problemas pasados, e ignorar proactivamente cualquier issue marcado como 'Resolved' en el JSON de estado.
+Eres el analizador de reuniones de NexusLive.
 Tu tarea es analizar la transcripción de la reunión y:
 1. Escribir un resumen detallado y profesional en español.
 2. Identificar si alguno de los problemas activos se ha resuelto.

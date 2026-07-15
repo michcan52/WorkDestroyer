@@ -90,12 +90,17 @@ namespace NexusLive.Core.Inference
 
             Console.WriteLine($"[LM STUDIO LOG] Generating completions for model: '{modelName}' (Prompt length: {userPrompt.Length + systemPrompt.Length} chars)...");
 
+            string detectedLang = LanguageDetector.Detect(userPrompt);
+            string forcedInstruction = detectedLang == "es"
+                ? "\n[IMPORTANT: Respond ONLY in Spanish/Español. The last segment was in Spanish.]"
+                : "\n[IMPORTANT: Respond ONLY in English. The last segment was in English.]";
+
             var payload = new LlmRequestPayload
             {
                 Model = modelName,
                 Messages = new List<ChatMessage>
                 {
-                    new ChatMessage { Role = "system", Content = systemPrompt },
+                    new ChatMessage { Role = "system", Content = systemPrompt + forcedInstruction },
                     new ChatMessage { Role = "user", Content = userPrompt }
                 },
                 Temperature = 0.2,

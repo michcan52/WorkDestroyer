@@ -200,10 +200,7 @@
 
     private void HandleNewLiveSuggestion(string suggestion)
     {
-        InvokeAsync(() =>
-        {
-            StateHasChanged();
-        });
+        InvokeAsync(StateHasChanged);
     }
 
     private async Task LoadIssuesListAsync()
@@ -218,8 +215,10 @@
         InvokeAsync(async () =>
         {
             ActiveSegments = WorkingMemory.GetActiveSegments();
+            StateHasChanged(); // Render segments instantly
+            
             await LoadIssuesListAsync();
-            StateHasChanged();
+            StateHasChanged(); // Render issues list once loaded
         });
     }
 

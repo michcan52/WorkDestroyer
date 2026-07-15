@@ -20,6 +20,9 @@ namespace NexusLive.Core
         private readonly LlmOptions _llmOptions;
         private readonly MeetingHistoryService _historyService;
 
+        private string _pastMeetingsPendingIssues = string.Empty;
+        private string? _lastDetectedLanguage = null;
+
         public event Action? OnStateChanged;
         public event Action<string>? OnNewLiveSuggestion;
 
@@ -53,9 +56,34 @@ namespace NexusLive.Core
             LiveSuggestion = string.Empty;
             MeetingSummary = string.Empty;
             _memory.Clear();
+            _lastDetectedLanguage = null;
             
             ModelStatusMessage = $"Switching to Live Model ({_llmOptions.LiveModelName})...";
             NotifyStateChanged();
+
+            // Cargar problemas técnicos pendientes de las últimas sesiones relevantes
+            _pastMeetingsPendingIssues = string.Empty;
+            try
+            {
+                var pastMeetings = _historyService.GetAllMeetings();
+                var sb = new System.Text.StringBuilder();
+                int count = 0;
+                foreach (var mtg in pastMeetings)
+                {
+                    if (count >= 3) break;
+                    if (!string.IsNullOrWhiteSpace(mtg.Summary))
+                    {
+                        sb.AppendLine($"- Past Session {mtg.Id} ({mtg.Date:yyyy-MM-dd HH:mm:ss}): {mtg.Summary}");
+                        count++;
+                    }
+                }
+                _pastMeetingsPendingIssues = sb.ToString();
+                Console.WriteLine($"[DIAGNOSTIC] Loaded pending technical issues from {count} past sessions context.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DIAGNOSTIC] Error loading past meetings context: {ex.Message}");
+            }
 
             // Trigger dynamic model loading command for Live model (Phi-4-mini)
             await _llmService.SwitchModelAsync(_llmOptions.LiveModelName, cancellationToken);
@@ -74,6 +102,15 @@ namespace NexusLive.Core
             }
 
             Console.WriteLine($"[DIAGNOSTIC] AddTranscriptSegmentAsync received text: '{text}'");
+
+            // Log en consola de cambio de idioma
+            string currentLang = Inference.LanguageDetector.Detect(text);
+            if (_lastDetectedLanguage != null && _lastDetectedLanguage != currentLang)
+            {
+                Console.WriteLine($"[LANGUAGE CHANGE DETECTED] Language changed from {_lastDetectedLanguage} to {currentLang} in transcription: \"{text}\"");
+            }
+            _lastDetectedLanguage = currentLang;
+
             var segment = new TranscriptionSegment
             {
                 Text = text,
@@ -90,10 +127,13 @@ namespace NexusLive.Core
             Console.WriteLine($"[DIAGNOSTIC] RAG Context found: '{ragContext}'");
 
             // Formulate prompts
-            string systemPrompt = $@"You are the Real-Time Assistant module of NexusLive. Base your suggestions only on the context of the last 10 minutes.
+            string systemPrompt = $@"Eres un Team Leader de NSAP para AMS. Tu prioridad es rastrear la evolución de problemas en aplicaciones, distinguir entre problemas nuevos y actualizaciones de problemas pasados, e ignorar proactivamente cualquier issue marcado como 'Resolved' en el JSON de estado.
+La reunión es bilingüe. Responde siempre en el mismo idioma que el último segmento de la conversación. No traduzcas ni normalices, mantén el contexto del orador original.
+Base your suggestions only on the context of the last 10 minutes.
 Do not suggest actions for resolved issues. Be extremely concise.
 ACTIVE ISSUES: {_stateManager.ToJsonString()}
-PREVIOUS MEETINGS CONTEXT: {ragContext}";
+PREVIOUS MEETINGS CONTEXT: {ragContext}
+PAST MEETINGS PENDING ISSUES: {_pastMeetingsPendingIssues}";
 
             string userPrompt = $"Last 10 minutes: {_memory.GetFormattedContext()}\n\nWhat are the suggestions?";
 
